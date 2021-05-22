@@ -23,11 +23,12 @@ def update_fps():
 
 
 r = 1
-particles = [Particle(random.randint(1, width - r*2 - 1), random.randint(1, height - r*2 - 1), r) for _ in range(2000)]
+particles = [Particle(random.randint(1, width/2 - r*2 - 1), random.randint(1, height/2 - r*2 - 1), r) for _ in range(2000)]
 for p in particles:
     p.velocity = [random.random() * 2 - 1, random.random() * 2 - 1]
+    p.velocity = [e*2 for e in p.velocity]
     p.color = [random.randint(0, 255) for _ in range(3)]
-quadTree = QuadTree([p.rect for p in particles], boundingBox=walls, maxDepth=6)
+quadTree = QuadTree([p.rect for p in particles], boundingBox=walls)
 updateCounter = 0
 
 while True:
@@ -41,7 +42,7 @@ while True:
     updateCounter += 1
     if updateCounter > 10:
         updateCounter = 0
-        quadTree = QuadTree([p.rect for p in particles], boundingBox=walls, maxDepth=6)
+        quadTree = QuadTree([p.rect for p in particles], boundingBox=walls)
     else:
         quadTree.update([p.rect for p in particles])
     quadTree.draw(screen)

@@ -1,6 +1,7 @@
 import pygame
 from pygame import Rect
 from Particle import Particle
+from KDTree import KDTree
 import random
 import sys
 
@@ -21,12 +22,14 @@ def update_fps():
     return fps_text
 
 
-r = 5
-particles = [Particle(random.randint(1, width/2 - r*2 - 1), random.randint(1, height/2 - r*2 - 1), r) for _ in range(450)]
+r = 1
+particles = [Particle(random.randint(1, width/2 - r*2 - 1), random.randint(1, height/2 - r*2 - 1), r) for _ in range(2000)]
 for p in particles:
     p.velocity = [random.random() * 2 - 1, random.random() * 2 - 1]
     p.velocity = [e*2 for e in p.velocity]
     p.color = [random.randint(0, 255) for _ in range(3)]
+kDTree = KDTree([p.rect for p in particles], boundingBox=walls)
+updateCounter = 0
 
 while True:
     for event in pygame.event.get():
@@ -36,11 +39,15 @@ while True:
     clock.tick(60)
     for p in particles:
         p.move(walls)
+    updateCounter += 1
+    if updateCounter > 5:
+        updateCounter = 0
+        kDTree = KDTree([p.rect for p in particles], boundingBox=walls)
+    else:
+        kDTree.update([p.rect for p in particles])
+    kDTree.draw(screen)
     for p in particles:
-        colliding = []
-        for otherP in particles:
-            if p != otherP and p.rect.colliderect(otherP.rect):
-                colliding.append(otherP)
+        colliding = kDTree.getColliding(p.rect)
         if colliding:
             p.color[0] = 255
             for r in colliding:
